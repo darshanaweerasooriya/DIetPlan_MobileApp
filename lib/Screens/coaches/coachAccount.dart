@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
-class account extends StatefulWidget {
-  const account({super.key});
+class coachAccout extends StatefulWidget {
+  const coachAccout({super.key});
 
   @override
-  State<account> createState() => _accountState();
+  State<coachAccout> createState() => _coachAccoutState();
 }
 
-class _accountState extends State<account> {
+class _coachAccoutState extends State<coachAccout> {
+  @override
   late String username;
   late String email;
   late String phoneNumber;
@@ -36,7 +37,7 @@ class _accountState extends State<account> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "My Account",
+                      "Coach Account",
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -52,9 +53,11 @@ class _accountState extends State<account> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 10),
                       ),
-                      child: const Text("Log Out", style: TextStyle(fontSize: 16)),
+                      child: const Text(
+                          "Log Out", style: TextStyle(fontSize: 16)),
                     ),
                   ],
                 ),
@@ -97,18 +100,7 @@ class _accountState extends State<account> {
                 Divider(),
 
                 // Categories
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.category, color: Colors.grey[700]),
-                  title: Text(
-                    "Categories",
-                    style: TextStyle(fontSize: 18, color: Colors.black87),
-                  ),
-                  trailing: Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    // Navigate to categories
-                  },
-                ),
+                
               ],
             ),
           ),
