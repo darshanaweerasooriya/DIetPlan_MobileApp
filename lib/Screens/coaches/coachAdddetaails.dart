@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:healthbiteapp/Screens/clients/results.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
-class addDetails extends StatefulWidget {
-  const addDetails({super.key});
+
+class addDetailsCoach extends StatefulWidget {
+  const addDetailsCoach({super.key});
 
   @override
-  State<addDetails> createState() => _addDetailsState();
+  State<addDetailsCoach> createState() => _addDetailsCoachState();
 }
 
-class _addDetailsState extends State<addDetails> {
+class _addDetailsCoachState extends State<addDetailsCoach> {
   final TextEditingController ageController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
@@ -18,55 +17,41 @@ class _addDetailsState extends State<addDetails> {
   final TextEditingController targetDateController = TextEditingController();
 
   String _gender = 'Male';
-  String _target = 'Body Building';
+  List<String> _selectedTargets = [];
 
   Future<void> submitData() async {
-    // final uri = Uri.parse('https://yourapi.com/api/user-details');
-    //
-    // final response = await http.post(
-    //   uri,
-    //   headers: {'Content-Type': 'application/json'},
-    //   body: jsonEncode({
-    //     'age': ageController.text.trim(),
-    //     'height': heightController.text.trim(),
-    //     'weight': weightController.text.trim(),
-    //     'gender': _gender,
-    //     'target': _target,
-    //     'dailyStatus': statusController.text.trim(),
-    //     'targetDate': targetDateController.text.trim(),
-    //   }),
-    //
-    // );
-    //
-    // if (response.statusCode == 200) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text("Details submitted successfully!")),
-    //   );
-    // } else {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text("Failed to submit details")),
-    //   );
-    // }
+    // Example output
+    print('Age: ${ageController.text}');
+    print('Height: ${heightController.text}');
+    print('Weight: ${weightController.text}');
+    print('Gender: $_gender');
+    print('Selected Services: $_selectedTargets');
+    print('Daily Status: ${statusController.text}');
+    print('Target Date: ${targetDateController.text}');
+
+    // Navigate to results screen
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const results()),
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.grey[50],
-
         body: ListView(
           padding: const EdgeInsets.all(20),
           children: [
             _sectionTitle("Enter Your Details"),
 
             _fieldLabel("Age"),
-            _buildInputField(controller: ageController, hint: "e.g. 25", icon: Icons.calendar_today),
+            _buildInputField(
+              controller: ageController,
+              hint: "e.g. 25",
+              icon: Icons.calendar_today,
+            ),
 
             SizedBox(height: 20),
             Row(
@@ -76,7 +61,11 @@ class _addDetailsState extends State<addDetails> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _fieldLabel("Height (cm)"),
-                      _buildInputField(controller: heightController, hint: "e.g. 170", icon: Icons.height),
+                      _buildInputField(
+                        controller: heightController,
+                        hint: "e.g. 170",
+                        icon: Icons.height,
+                      ),
                     ],
                   ),
                 ),
@@ -86,7 +75,11 @@ class _addDetailsState extends State<addDetails> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _fieldLabel("Weight (kg)"),
-                      _buildInputField(controller: weightController, hint: "e.g. 70", icon: Icons.monitor_weight),
+                      _buildInputField(
+                        controller: weightController,
+                        hint: "e.g. 70",
+                        icon: Icons.monitor_weight,
+                      ),
                     ],
                   ),
                 ),
@@ -102,20 +95,35 @@ class _addDetailsState extends State<addDetails> {
             ),
 
             SizedBox(height: 20),
-            _fieldLabel("Target"),
-            _radioGroup(
-              options: ['Body Building', 'Weight Loss'],
-              selectedValue: _target,
-              onChanged: (val) => setState(() => _target = val),
+            _fieldLabel("Service "),
+            Column(
+              children: [
+                _buildCheckbox("Body Building"),
+                _buildCheckbox("Weight Loss"),
+              ],
             ),
 
             SizedBox(height: 20),
-            _fieldLabel("Daily Status"),
-            _buildInputField(controller: statusController, hint: "e.g. Active", icon: Icons.timeline),
+            _fieldLabel("Qualifications"),
+            _buildInputField(
+              controller: targetDateController,
+              hint: "",
+              icon: Icons.add,
+            ),
+
 
             SizedBox(height: 20),
-            _fieldLabel("Target Date"),
-            _buildInputField(controller: targetDateController, hint: "e.g. 2025-12-31", icon: Icons.date_range),
+            _fieldLabel("About"),
+            TextField(
+              controller: statusController,
+              decoration: InputDecoration(
+                hintText: "About",
+                prefixIcon: Icon(Icons.details),
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 4, // You can adjust this to however many lines you want
+            ),
+
 
             SizedBox(height: 30),
             Center(
@@ -130,7 +138,8 @@ class _addDetailsState extends State<addDetails> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: Text("Submit", style: TextStyle(fontSize: 18, color: Colors.white)),
+                  child: Text("Submit",
+                      style: TextStyle(fontSize: 18, color: Colors.white)),
                 ),
               ),
             ),
@@ -141,17 +150,27 @@ class _addDetailsState extends State<addDetails> {
   }
 
   Widget _fieldLabel(String label) {
-    return Text(label, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600));
+    return Text(
+      label,
+      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+    );
   }
 
   Widget _sectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child: Text(title, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+      child: Text(
+        title,
+        style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+      ),
     );
   }
 
-  Widget _buildInputField({required TextEditingController controller, required String hint, required IconData icon}) {
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+  }) {
     return Container(
       height: 48,
       decoration: BoxDecoration(
@@ -169,7 +188,11 @@ class _addDetailsState extends State<addDetails> {
     );
   }
 
-  Widget _radioGroup({required List<String> options, required String selectedValue, required Function(String) onChanged}) {
+  Widget _radioGroup({
+    required List<String> options,
+    required String selectedValue,
+    required Function(String) onChanged,
+  }) {
     return Row(
       children: options.map((option) {
         return Row(
@@ -184,6 +207,23 @@ class _addDetailsState extends State<addDetails> {
           ],
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildCheckbox(String label) {
+    return CheckboxListTile(
+      title: Text(label),
+      value: _selectedTargets.contains(label),
+      onChanged: (bool? value) {
+        setState(() {
+          if (value == true) {
+            _selectedTargets.add(label);
+          } else {
+            _selectedTargets.remove(label);
+          }
+        });
+      },
+      controlAffinity: ListTileControlAffinity.leading,
     );
   }
 }

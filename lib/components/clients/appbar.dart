@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:healthbiteapp/Screens/clients/account.dart';
 import 'package:healthbiteapp/Screens/clients/addDetails.dart';
 import 'package:healthbiteapp/Screens/clients/dashBoard.dart';
+import 'package:healthbiteapp/Screens/clients/message.dart';
 import 'package:healthbiteapp/Screens/clients/plans.dart';
 import 'package:healthbiteapp/Screens/splash/splachScreen.dart';
 
@@ -19,7 +20,7 @@ class _tabbarState extends State<tabbar> {
    dashBoard(),
     addDetails(),
     plans(),
-    splashScreen(),
+    onlinePeople(),
     account()
 
   ];
@@ -62,7 +63,11 @@ class _tabbarState extends State<tabbar> {
 
               appBar: AppBar(
                 backgroundColor: Colors.black,
-                 title: Text("Home"),
+                 title: Text("Home",style: TextStyle(
+                   fontSize: 20,
+                   fontWeight: FontWeight.bold,
+                   color: Colors.white
+                 )),
 
               ),
               bottomNavigationBar: NavigationBarTheme(
