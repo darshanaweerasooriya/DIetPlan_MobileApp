@@ -100,7 +100,7 @@ class _coachAccoutState extends State<coachAccout> {
                 Divider(),
 
                 // Categories
-                
+
               ],
             ),
           ),
