@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:healthbiteapp/Screens/clients/results.dart';
+// import 'package:healthbiteapp/Screens/clients/results.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:healthbiteapp/Screens/clients/results.dart';
 class addDetails extends StatefulWidget {
   const addDetails({super.key});
 
@@ -21,36 +22,85 @@ class _addDetailsState extends State<addDetails> {
   String _target = 'Body Building';
 
   Future<void> submitData() async {
-    // final uri = Uri.parse('https://yourapi.com/api/user-details');
-    //
-    // final response = await http.post(
-    //   uri,
-    //   headers: {'Content-Type': 'application/json'},
-    //   body: jsonEncode({
-    //     'age': ageController.text.trim(),
-    //     'height': heightController.text.trim(),
-    //     'weight': weightController.text.trim(),
-    //     'gender': _gender,
-    //     'target': _target,
-    //     'dailyStatus': statusController.text.trim(),
-    //     'targetDate': targetDateController.text.trim(),
-    //   }),
-    //
-    // );
-    //
-    // if (response.statusCode == 200) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text("Details submitted successfully!")),
-    //   );
-    // } else {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text("Failed to submit details")),
-    //   );
-    // }
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const results()),
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('token');
+
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Unauthorized: No token found")),
+      );
+      return;
+    }
+
+    final uri = Uri.parse('http://10.0.2.2:3001/api/fitnessassess');
+
+    final response = await http.post(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'age': int.parse(ageController.text.trim()),
+        'height': double.parse(heightController.text.trim()),
+        'weight': double.parse(weightController.text.trim()),
+        'gender': _gender,
+        'target': _target,
+        'dailyStatus': statusController.text.trim(),
+        'targetDate': targetDateController.text.trim(),
+      }),
     );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final responseData = jsonDecode(response.body);
+      final result = responseData['result'];
+
+      double dailyCalories = result['dailyCalories'];
+      double protein = result['protein'];
+      double water = result['water'];
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Details submitted successfully!")),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => results(
+            dailyCalories: dailyCalories,
+            protein: protein,
+            water: water,
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to submit details")),
+      );
+      print(response.body); // for debugging
+    }
+  }
+
+
+  double calculateDailyCalories() {
+    // Example BMR calculation (Mifflin-St Jeor Equation)
+    double weight = double.parse(weightController.text.trim());
+    double height = double.parse(heightController.text.trim());
+    int age = int.parse(ageController.text.trim());
+
+    // Assuming male gender for this example (adjust based on the actual gender)
+    return (10 * weight) + (6.25 * height) - (5 * age) + 5; // BMR for men
+  }
+
+  double calculateProtein() {
+    // Example: Protein intake is typically 1g per kg of body weight
+    double weight = double.parse(weightController.text.trim());
+    return weight; // Example: 1g protein per kg of body weight
+  }
+
+  double calculateWaterIntake() {
+    // Example: Water intake is typically 30-35 ml per kg of body weight
+    double weight = double.parse(weightController.text.trim());
+    return weight * 0.03; // Example: 30 ml per kg of body weight
   }
 
 
@@ -59,15 +109,12 @@ class _addDetailsState extends State<addDetails> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.grey[50],
-
         body: ListView(
           padding: const EdgeInsets.all(20),
           children: [
             _sectionTitle("Enter Your Details"),
-
             _fieldLabel("Age"),
             _buildInputField(controller: ageController, hint: "e.g. 25", icon: Icons.calendar_today),
-
             SizedBox(height: 20),
             Row(
               children: [
@@ -92,7 +139,6 @@ class _addDetailsState extends State<addDetails> {
                 ),
               ],
             ),
-
             SizedBox(height: 20),
             _fieldLabel("Gender"),
             _radioGroup(
@@ -100,23 +146,19 @@ class _addDetailsState extends State<addDetails> {
               selectedValue: _gender,
               onChanged: (val) => setState(() => _gender = val),
             ),
-
             SizedBox(height: 20),
             _fieldLabel("Target"),
             _radioGroup(
-              options: ['Body Building', 'Weight Loss'],
+              options: ['Body building', 'Weight loss'],
               selectedValue: _target,
               onChanged: (val) => setState(() => _target = val),
             ),
-
             SizedBox(height: 20),
             _fieldLabel("Daily Status"),
             _buildInputField(controller: statusController, hint: "e.g. Active", icon: Icons.timeline),
-
             SizedBox(height: 20),
             _fieldLabel("Target Date"),
             _buildInputField(controller: targetDateController, hint: "e.g. 2025-12-31", icon: Icons.date_range),
-
             SizedBox(height: 30),
             Center(
               child: SizedBox(

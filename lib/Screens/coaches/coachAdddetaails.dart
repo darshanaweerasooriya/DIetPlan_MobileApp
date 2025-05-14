@@ -29,11 +29,11 @@ class _addDetailsCoachState extends State<addDetailsCoach> {
     print('Daily Status: ${statusController.text}');
     print('Target Date: ${targetDateController.text}');
 
-    // Navigate to results screen
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const results()),
-    );
+    // // Navigate to results screen
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(builder: (context) => const results()),
+    // );
   }
 
   @override
