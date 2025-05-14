@@ -48,9 +48,12 @@ class _clientLoginState extends State<clientLogin> {
         );
 
         var jsonResponse = jsonDecode(response.body);
-        if (jsonResponse['status'] == true) {
+        if (response.statusCode == 200 && jsonResponse['token'] != null) {
           var myToken = jsonResponse['token'];
-          prefs.setString('token', myToken);
+
+          // ✅ Initialize prefs
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('token', myToken); // ✅ Store the token
 
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
@@ -92,6 +95,7 @@ class _clientLoginState extends State<clientLogin> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

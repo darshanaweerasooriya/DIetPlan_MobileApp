@@ -3,4 +3,5 @@ class ApiConfig {
   static const String baseUrl = 'http://10.0.2.2:3001/';  // Your local IP address
   static const String registration = 'api/users';   // Endpoint for user registration
   static const String login = 'api/users/login';  // Endpoint for login (if needed)
+  static const String add = 'api/fitnessassess';
 }

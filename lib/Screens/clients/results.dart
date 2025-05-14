@@ -3,7 +3,14 @@ import 'package:healthbiteapp/Screens/clients/dietplan.dart';
 import 'package:healthbiteapp/Screens/clients/exercisePlan.dart';
 
 class results extends StatefulWidget {
-  const results({super.key});
+  final double dailyCalories;  // Accept dailyCalories as a parameter
+  final double protein;        // Accept protein as a parameter
+  final double water;          // Accept water as a parameter
+  const results({Key? key,
+    required this.dailyCalories,
+    required this.protein,
+    required this.water,}) :  super(key: key);
+
 
   @override
   State<results> createState() => _resultsState();
@@ -41,13 +48,13 @@ class _resultsState extends State<results> {
                 ],
               ),
               SizedBox(height: 30),
-              _buildResultCard("Your daily Calorie intake", "2500 kcal", Icons.local_fire_department),
+              _buildResultCard("Your daily Calorie intake", "${widget.dailyCalories} kcal", Icons.local_fire_department),
               SizedBox(height: 20),
               _buildResultCard("Your daily Calorie deficit", "500 kcal", Icons.remove_circle_outline),
               SizedBox(height: 20),
-              _buildResultCard("Your daily protein intake", "150 g", Icons.fastfood),
+              _buildResultCard("Your daily protein intake", "${widget.protein} g", Icons.fastfood),
               SizedBox(height: 20),
-              _buildResultCard("Your daily water intake", "3 L", Icons.water_drop),
+              _buildResultCard("Your daily water intake", "${widget.water} L", Icons.water_drop),
               SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -144,5 +151,4 @@ class _resultsState extends State<results> {
       ),
     );
   }
-
 }
