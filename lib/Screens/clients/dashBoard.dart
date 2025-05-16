@@ -74,8 +74,8 @@ class _dashBoardState extends State<dashBoard> {
           child: ListView(
             children: [
               _buildHeader(),
-              const SizedBox(height: 20),
-              _buildMetrics(),
+              // const SizedBox(height: 20),
+              // _buildMetrics(),
               const SizedBox(height: 20),
               _buildScrollableStats(),
               const SizedBox(height: 20),
@@ -150,15 +150,15 @@ class _dashBoardState extends State<dashBoard> {
     );
   }
 
-  Widget _buildMetrics() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _metricCard("Height", "186 cm", Colors.greenAccent),
-        _metricCard("Weight", "86 kg", Colors.orangeAccent),
-      ],
-    );
-  }
+  // Widget _buildMetrics() {
+  //   return Row(
+  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //     children: [
+  //       _metricCard("Height", "186 cm", Colors.greenAccent),
+  //       _metricCard("Weight", "86 kg", Colors.orangeAccent),
+  //     ],
+  //   );
+  // }
 
   Widget _metricCard(String title, String value, Color color) {
     return Expanded(
