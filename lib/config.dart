@@ -4,4 +4,5 @@ class ApiConfig {
   static const String registration = 'api/users';   // Endpoint for user registration
   static const String login = 'api/users/login';  // Endpoint for login (if needed)
   static const String add = 'api/fitnessassess';
+  static const String display = 'api/fitnessassess/latest';
 }

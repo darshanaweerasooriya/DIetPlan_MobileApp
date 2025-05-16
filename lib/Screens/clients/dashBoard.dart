@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class dashBoard extends StatefulWidget {
   const dashBoard({super.key});
@@ -8,6 +11,59 @@ class dashBoard extends StatefulWidget {
 }
 
 class _dashBoardState extends State<dashBoard> {
+  double? height;
+  double? weight;
+  bool isLoading = true;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    loadAssessment();
+  }
+
+  Future<void>  loadAssessment() async{
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token') ?? '';
+
+    if (token.isEmpty) {
+      // No token found, handle accordingly
+      setState(() {
+        isLoading = false;
+      });
+      print('No token found');
+      return;
+    }
+
+    final latest = await fetchLatestAssessment(token);
+    if (latest != null) {
+      setState(() {
+        height = (latest['height'] != null) ? double.tryParse(latest['height'].toString()) : null;
+        weight = (latest['weight'] != null) ? double.tryParse(latest['weight'].toString()) : null;
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<Map<String, dynamic>?> fetchLatestAssessment(String token) async{
+    final response = await http.get(
+      Uri.parse('http://10.0.2.2:3001/api/fitnessassess/latest'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      }
+    );
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data['latest']; // Make sure this matches your API response structure
+    } else {
+      print('Failed to fetch assessment: ${response.statusCode}');
+      return null;
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,8 +74,8 @@ class _dashBoardState extends State<dashBoard> {
           child: ListView(
             children: [
               _buildHeader(),
-              const SizedBox(height: 20),
-              _buildMetrics(),
+              // const SizedBox(height: 20),
+              // _buildMetrics(),
               const SizedBox(height: 20),
               _buildScrollableStats(),
               const SizedBox(height: 20),
@@ -67,8 +123,16 @@ class _dashBoardState extends State<dashBoard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _infoColumn("Height", "186 cm"),
-              _infoColumn("Weight", "86 kg"),
+              _infoColumn(
+                  "Height",
+                  height != null
+                      ? "${height!.toStringAsFixed(0)} cm"
+                      : "N/A"),
+              _infoColumn(
+                  "Weight",
+                  weight != null
+                      ? "${weight!.toStringAsFixed(0)} kg"
+                      : "N/A"),
             ],
           ),
         ],
@@ -86,15 +150,15 @@ class _dashBoardState extends State<dashBoard> {
     );
   }
 
-  Widget _buildMetrics() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _metricCard("Height", "186 cm", Colors.greenAccent),
-        _metricCard("Weight", "86 kg", Colors.orangeAccent),
-      ],
-    );
-  }
+  // Widget _buildMetrics() {
+  //   return Row(
+  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //     children: [
+  //       _metricCard("Height", "186 cm", Colors.greenAccent),
+  //       _metricCard("Weight", "86 kg", Colors.orangeAccent),
+  //     ],
+  //   );
+  // }
 
   Widget _metricCard(String title, String value, Color color) {
     return Expanded(
