@@ -40,7 +40,7 @@ class _loginCoachState extends State<loginCoach> {
   }
 
   Future<void> loging() async{
-    final url = Uri.parse('http://10.0.2.2:3000/login');
+    final url = Uri.parse('http://10.0.2.2:3000/api/professional/login');
     try {
       final response = await http.post(
         url,

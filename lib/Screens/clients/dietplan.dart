@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class deitPlans extends StatefulWidget {
   const deitPlans({super.key});
@@ -8,93 +11,107 @@ class deitPlans extends StatefulWidget {
 }
 
 class _deitPlansState extends State<deitPlans> {
+  Map<String, dynamic>? dietPlan;
+  bool isLoading = true;
+  String errorMessage = '';
+
   @override
-  Widget build(BuildContext context) {
-    return SafeArea(child: Scaffold(
-      body: ListView(
-        children: [
-
-          // _buildMealTabs(),
-          // const SizedBox(height: 24),
-          // _buildExerciseList(),
-          Column(
-            children: [
-              SizedBox(height: 10,),
-              Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back, size: 30, color: Colors.black),
-                    onPressed: () {
-                      Navigator.pop(context); // Go back to the previous screen
-                    },
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    "Diet Plan",
-                    style: TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-              Spacer(),
-              Container(
-                width: 80, // Equal width and height for square shape
-                height: 40,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Navigator.of(context).push(MaterialPageRoute(
-                    //     builder: (_) => signUpCLient()));
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8), // Optional: for slightly rounded corners
-                    ),
-                    padding: EdgeInsets.zero, // Remove default padding
-                  ),
-                  child: Text("Save",style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 1.2,
-                  ),), // Use an icon or short text
-                ),
-              ),
-      ]
-
-
-    ),
-
-            ],
-          ),
-          SizedBox(height: 20,),
-          _buildHeaderImage(),
-          const SizedBox(height: 24),
-          _buildMealTabs(),
-          const SizedBox(height: 24),
-
-        ],
-      ),
-    ));
+  void initState() {
+    super.initState();
+    fetchDietPlan();
   }
-  Widget _buildHeaderImage() {
-    return Container(
-      height: 180,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 12)],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Image.asset(
-        "images/foods.jpg",
-        fit: BoxFit.cover,
-        width: double.infinity,
-      ),
+
+  Future<void> fetchDietPlan() async {
+    print('⚙️ Starting to fetch diet plan...');
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? token = prefs.getString('token');
+      print('📦 Retrieved token: $token');
+
+      if (token == null) {
+        setState(() {
+          isLoading = false;
+          errorMessage = '❌ Unauthorized: No token found in SharedPreferences';
+        });
+        return;
+      }
+
+      final uri = Uri.parse('http://10.0.2.2:3001/api/fitnessassess/plan');
+      print('🌐 Sending GET request to: $uri');
+
+      final response = await http.get(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('📨 Status Code: ${response.statusCode}');
+      print('📨 Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('✅ JSON decoded successfully: $data');
+
+        if (data['plan'] == null) {
+          print('❌ "plan" key not found in response.');
+          setState(() {
+            isLoading = false;
+            errorMessage = 'Plan data not found in server response.';
+          });
+          return;
+        }
+
+        setState(() {
+          dietPlan = data['plan'];
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+          errorMessage = '❌ Failed to load diet plan: ${response.statusCode} - ${response.body}';
+        });
+      }
+    } catch (e, stackTrace) {
+      print('🔥 Exception occurred: $e');
+      print('🪵 Stack Trace: $stackTrace');
+      setState(() {
+        isLoading = false;
+        errorMessage = 'Exception: $e';
+      });
+    }
+  }
+
+
+  Widget _buildMealList(List<dynamic> meals) {
+    return ListView.builder(
+      itemCount: meals.length,
+      itemBuilder: (context, index) {
+        final meal = meals[index];
+        return Card(
+          margin: const EdgeInsets.all(8),
+          child: ListTile(
+            leading: Image.network(
+              meal['image'],
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
+            ),
+            title: Text(meal['title']),
+            subtitle: Text(
+              'Calories: ${meal['calories']} | Protein: ${meal['protein']}g | Fat: ${meal['fat']}g | Carbs: ${meal['carbs']}g',
+            ),
+          ),
+        );
+      },
     );
   }
+
   Widget _buildMealTabs() {
+    if (dietPlan == null) {
+      return Center(child: Text('No plan found'));
+    }
+
     return DefaultTabController(
       length: 3,
       child: Column(
@@ -116,17 +133,34 @@ class _deitPlansState extends State<deitPlans> {
               ],
             ),
           ),
-          const SizedBox(
-            height: 150,
+          SizedBox(
+            height: 300, // adjust as needed
             child: TabBarView(
               children: [
-                Center(child: Text("Oatmeal, Eggs, Coffee", style: TextStyle(fontSize: 16))),
-                Center(child: Text("Rice, Chicken, Salad", style: TextStyle(fontSize: 16))),
-                Center(child: Text("Soup, Bread, Vegetables", style: TextStyle(fontSize: 16))),
+                _buildMealList(dietPlan!['breakfast']),
+                _buildMealList(dietPlan!['lunch']),
+                _buildMealList(dietPlan!['dinner']),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Your Diet Plan'),
+      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : errorMessage.isNotEmpty
+          ? Center(child: Text(errorMessage))
+          : Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: _buildMealTabs(),
       ),
     );
   }

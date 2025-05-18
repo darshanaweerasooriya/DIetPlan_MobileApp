@@ -18,7 +18,7 @@ class _signupCoachState extends State<signupCoach> {
   final bool _isNotvalidate = false;
 
   Future<void> signUp() async {
-    final Uri uri = Uri.parse('http://10.0.2.2:3000/registration');
+    final Uri uri = Uri.parse('http://10.0.2.2:3001/api/professional/register');
     final Map<String, dynamic> userData = {
       'Username': usernameController.text,
       'Email': useremail.text,
