@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:healthbiteapp/Screens/clients/feedback.dart';
+import 'package:healthbiteapp/Screens/clients/goccery.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -111,7 +113,7 @@ class _dashBoardState extends State<dashBoard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Alex Hales", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                    const Text("Name", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
                     Text("Age 23", style: TextStyle(fontSize: 16, color: Colors.grey[600])),
                   ],
@@ -244,7 +246,12 @@ class _dashBoardState extends State<dashBoard> {
           title: "Grocery",
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => MealDetailPage(mealType: "Dinner")),
+            MaterialPageRoute(
+              builder: (_) => GroceryListPage(
+                token: 'your_token_here', // Replace with your stored token
+                selectedDate: '2025-05-19', // Or use dynamically selected date
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 10),
@@ -253,7 +260,7 @@ class _dashBoardState extends State<dashBoard> {
           title: "Feedbacks ",
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => ExerciseDetailPage()),
+            MaterialPageRoute(builder: (_) => FeedbackPage()),
           ),
         ),
       ],
