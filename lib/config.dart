@@ -9,4 +9,5 @@ class ApiConfig {
   static const String coachreg = 'api/professional/register';
   static const String coachlog = 'api/professional/login';
   static const String create ='api/professional/create';
+  static const String profile= 'api/users/profile';
 }

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class account extends StatefulWidget {
   const account({super.key});
@@ -8,16 +11,54 @@ class account extends StatefulWidget {
 }
 
 class _accountState extends State<account> {
-  late String username;
-  late String email;
-  late String phoneNumber;
+  String username = '';
+  String email = '';
+  String phoneNumber = '';
+  String profileImage = '';
 
   @override
   void initState() {
     super.initState();
-    username = 'Dev User';
-    email = 'dev@example.com';
-    phoneNumber = '123-456-7890';
+    fetchUserData();
+  }
+
+  Future<void> fetchUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token') ?? '';
+
+    if (token.isEmpty) {
+      // Handle missing token
+      return;
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:3001/api/users/profile/:id'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final userData = json.decode(response.body)['user'];
+        setState(() {
+          username = userData['username'] ?? '';
+          email = userData['email'] ?? '';
+          phoneNumber = userData['phonenumber'] ?? '';
+          profileImage = userData['profileImage'] ?? '';
+        });
+      } else {
+        print('Error fetching profile: ${response.body}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  void logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override
@@ -44,9 +85,7 @@ class _accountState extends State<account> {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: () {
-                        // Log out logic
-                      },
+                      onPressed: logout,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.redAccent,
                         shape: RoundedRectangleBorder(
@@ -64,7 +103,9 @@ class _accountState extends State<account> {
                 Center(
                   child: CircleAvatar(
                     radius: 50,
-                    backgroundImage: AssetImage("images/useraccnt.png"),
+                    backgroundImage: profileImage.isNotEmpty
+                        ? NetworkImage(profileImage)
+                        : AssetImage("images/useraccnt.png") as ImageProvider,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -73,7 +114,7 @@ class _accountState extends State<account> {
                 Center(
                   child: GestureDetector(
                     onTap: () {
-                      // Edit logic
+                      // Navigate to edit screen
                     },
                     child: Text(
                       "Edit Account",
@@ -96,7 +137,6 @@ class _accountState extends State<account> {
                 const SizedBox(height: 20),
                 Divider(),
 
-                // Categories
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(Icons.category, color: Colors.grey[700]),
