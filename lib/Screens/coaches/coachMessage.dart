@@ -13,10 +13,9 @@ class _coachChatState extends State<coachChat> {
   TextEditingController search = TextEditingController();
 
   final List<Map<String, String>> onlineUsers = [
-    {'image': 'images/signUp.jpg', 'name': 'John Doe', 'status': 'Available'},
-    {'image': 'images/user2.png', 'name': 'Emily Clark', 'status': 'Busy'},
-    {'image': 'images/user3.png', 'name': 'Mike Ross', 'status': 'Active now'},
-    {'image': 'images/user4.png', 'name': 'Sarah Lee', 'status': 'Available'},
+    {'image': 'images/signUp.jpg', 'name': 'Kamal', 'status': 'Available'},
+    {'image': 'images/user2.png', 'name': 'Dhanushka', 'status': 'Busy'},
+
   ];
 
   @override

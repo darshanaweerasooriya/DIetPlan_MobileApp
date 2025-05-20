@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:healthbiteapp/Screens/clients/message.dart';
 import 'dart:io';
 import 'dart:ui';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 
 class coachesSelection extends StatefulWidget {
   const coachesSelection({super.key});
@@ -13,18 +16,66 @@ class coachesSelection extends StatefulWidget {
 class _coachesSelectionState extends State<coachesSelection> {
   TextEditingController search = TextEditingController();
 
-  List<Map<String, String>> coaches = [
-    {'name': 'James Canning', 'image': 'images/splash.jpg'},
-    {'name': 'Alex John', 'image': 'https://via.placeholder.com/300x300?text=Alex'},
-    {'name': 'Harry Brook', 'image': 'https://via.placeholder.com/300x300?text=Harry'},
-    {'name': 'Mark Henry', 'image': 'https://via.placeholder.com/300x300?text=Mark'},
-    {'name': 'John Cameron', 'image': 'https://via.placeholder.com/300x300?text=John'},
-    {'name': 'Alan Root', 'image': 'https://via.placeholder.com/300x300?text=Alan'},
-    {'name': 'Another Coach', 'image': 'https://via.placeholder.com/300x300?text=Coach'},
-    {'name': 'Final Coach', 'image': 'https://via.placeholder.com/300x300?text=Final'},
-  ];
+  List<dynamic> allCoaches = [];
+  List<dynamic> filteredCoaches = [];
 
   int? selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCoaches();
+  }
+
+  Future<void> fetchCoaches() async {
+    final List<Map<String, dynamic>> sampleCoaches = [
+      {
+        'name': 'Coach lee',
+        'type': 1,
+        'profileImage': '',
+        'status': 'Available',
+      },
+      {
+        'name': 'Coach Chaminda',
+        'type': 1,
+        'profileImage': '',
+        'status': 'Busy',
+      },
+    ];
+
+    setState(() {
+      allCoaches = sampleCoaches;
+      filteredCoaches = sampleCoaches;
+    });
+
+    final url = Uri.parse('http://localhost:3001/api/professionals');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        final backendCoaches = data.where((coach) => coach['type'] == 1).toList();
+        setState(() {
+          allCoaches.addAll(backendCoaches);
+          filteredCoaches = allCoaches;
+        });
+      } else {
+        print('Failed to load coaches from backend');
+      }
+    } catch (e) {
+      print('Error fetching backend data: $e');
+    }
+  }
+
+  void filterSearch(String query) {
+    final results = allCoaches.where((coach) {
+      final name = coach['name'].toString().toLowerCase();
+      return name.contains(query.toLowerCase());
+    }).toList();
+
+    setState(() {
+      filteredCoaches = results;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +89,7 @@ class _coachesSelectionState extends State<coachesSelection> {
               const SizedBox(height: 20),
               Row(
                 children: [
-                  Text(
+                  const Text(
                     "Online Coaches",
                     style: TextStyle(
                       color: Colors.redAccent,
@@ -49,27 +100,17 @@ class _coachesSelectionState extends State<coachesSelection> {
                   const Spacer(),
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      "SKIP",
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 16,
-                      ),
-                    ),
+                    child: Text("SKIP", style: TextStyle(color: Colors.grey.shade600)),
                   ),
                 ],
               ),
               const SizedBox(height: 6),
-              Text(
-                "Select your online coach to guide your ultimate goal!",
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 14,
-                ),
-              ),
+              Text("Select your online coach to guide your ultimate goal!",
+                  style: TextStyle(color: Colors.grey.shade600)),
               const SizedBox(height: 20),
               TextField(
                 controller: search,
+                onChanged: filterSearch,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
@@ -83,10 +124,12 @@ class _coachesSelectionState extends State<coachesSelection> {
                 ),
               ),
               const SizedBox(height: 20),
-              GridView.builder(
+              filteredCoaches.isEmpty
+                  ? const Center(child: Text("No coaches found"))
+                  : GridView.builder(
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                itemCount: coaches.length,
+                itemCount: filteredCoaches.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   mainAxisSpacing: 15,
@@ -94,7 +137,7 @@ class _coachesSelectionState extends State<coachesSelection> {
                   childAspectRatio: 0.85,
                 ),
                 itemBuilder: (context, index) {
-                  final coach = coaches[index];
+                  final coach = filteredCoaches[index];
                   final isSelected = index == selectedIndex;
 
                   return GestureDetector(
@@ -126,22 +169,21 @@ class _coachesSelectionState extends State<coachesSelection> {
                             child: ClipRRect(
                               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                               child: Image.network(
-                                coach['image']!,
+                                coach['profileImage'] != null && coach['profileImage'].toString().isNotEmpty
+                                    ? 'http://localhost:3001/${coach['profileImage']}'
+                                    : 'https://via.placeholder.com/300x300?text=${coach['name']}',
                                 fit: BoxFit.cover,
                                 width: double.infinity,
-                                errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.error),
+                                errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
                               ),
                             ),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              coach['name']!,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                              ),
+                              coach['name'] ?? 'No Name',
+                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                              textAlign: TextAlign.center,
                             ),
                           ),
                         ],
@@ -154,18 +196,25 @@ class _coachesSelectionState extends State<coachesSelection> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.redAccent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                onPressed: () {
-                  // Proceed with selected coach
-                },
-                child: const Text(
-                  "Continue",
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
+                onPressed: selectedIndex != null
+                    ? () {
+                  final selectedCoach = filteredCoaches[selectedIndex!];
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => onlinePeople(
+                        coachName: selectedCoach['name'] ?? '',
+                        coachImage: selectedCoach['profileImage'] ?? '',
+                        coachStatus: selectedCoach['status'] ?? 'Available',
+                      ),
+                    ),
+                  );
+                }
+                    : null,
+                child: const Text("Continue", style: TextStyle(fontSize: 18, color: Colors.white)),
               ),
               const SizedBox(height: 20),
             ],
