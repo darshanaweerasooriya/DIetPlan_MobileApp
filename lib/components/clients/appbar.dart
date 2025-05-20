@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:healthbiteapp/Screens/clients/account.dart';
 import 'package:healthbiteapp/Screens/clients/addDetails.dart';
+import 'package:healthbiteapp/Screens/clients/coachesSelection.dart';
 import 'package:healthbiteapp/Screens/clients/dashBoard.dart';
 import 'package:healthbiteapp/Screens/clients/message.dart';
 import 'package:healthbiteapp/Screens/clients/plans.dart';
@@ -20,7 +21,7 @@ class _tabbarState extends State<tabbar> {
    dashBoard(),
     addDetails(),
     plans(),
-    onlinePeople(),
+    coachesSelection(),
     account()
 
   ];
@@ -92,7 +93,7 @@ class _tabbarState extends State<tabbar> {
                   NavigationDestination(icon: Icon(Icons.home,color: Colors.white,), label: "Home"),
                   NavigationDestination(icon: Icon(Icons.add,color: Colors.white,), label: "Add Details"),
                   NavigationDestination(icon: Icon(Icons.dashboard, color: Colors.white), label: "DashBoard"),
-                  NavigationDestination(icon: Icon(Icons.chat,color: Colors.white), label: "Chat"),
+                  NavigationDestination(icon: Icon(Icons.people,color: Colors.white), label: "Coaches"),
                   NavigationDestination(icon: Icon(Icons.person,color: Colors.white), label: "Account"),
 
                 ],

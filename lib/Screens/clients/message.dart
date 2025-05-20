@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:healthbiteapp/Screens/clients/chat.dart';
 
 class onlinePeople extends StatefulWidget {
-  const onlinePeople({super.key});
+  final String coachName;
+  final String coachImage;
+  final String coachStatus;
+  const onlinePeople({super.key,
+    required this.coachName,
+    required this.coachImage,
+    required this.coachStatus,});
 
   @override
   State<onlinePeople> createState() => _onlinePeopleState();
@@ -35,12 +41,75 @@ class _onlinePeopleState extends State<onlinePeople> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // Coach Details UI
+            _buildCoachDetails(),
+
+            const SizedBox(height: 16),
             _buildSearchBox(),
             const SizedBox(height: 24),
             _buildOnlineList(context),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCoachDetails() {
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 50,
+          backgroundImage: NetworkImage(widget.coachImage),
+          onBackgroundImageError: (_, __) {},
+        ),
+        const SizedBox(height: 12),
+        Text(
+          widget.coachName,
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          widget.coachStatus,
+          style: const TextStyle(fontSize: 16, color: Colors.green),
+        ),
+        const SizedBox(height: 12),
+
+        // Message Button
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => chat(
+                  username: widget.coachName,
+                  userImage: widget.coachImage,
+                ),
+              ),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.deepPurple,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.message, color: Colors.white),
+                SizedBox(width: 8),
+                Text(
+                  "Message",
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        const Divider(thickness: 1),
+      ],
     );
   }
 
@@ -134,6 +203,4 @@ class _onlinePeopleState extends State<onlinePeople> {
       }).toList(),
     );
   }
-
 }
-
