@@ -32,19 +32,27 @@ class _onlinePeopleState extends State<onlinePeople> {
         body: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            const Text(
-              "Online People",
-              style: TextStyle(
-                color: Colors.deepPurple,
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.deepPurple),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  "Online People",
+                  style: TextStyle(
+                    color: Colors.deepPurple,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
-
-            // Coach Details UI
             _buildCoachDetails(),
-
             const SizedBox(height: 16),
             _buildSearchBox(),
             const SizedBox(height: 24),
@@ -74,8 +82,6 @@ class _onlinePeopleState extends State<onlinePeople> {
           style: const TextStyle(fontSize: 16, color: Colors.green),
         ),
         const SizedBox(height: 12),
-
-        // Message Button
         GestureDetector(
           onTap: () {
             Navigator.push(
@@ -101,7 +107,8 @@ class _onlinePeopleState extends State<onlinePeople> {
                 SizedBox(width: 8),
                 Text(
                   "Message",
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -138,7 +145,8 @@ class _onlinePeopleState extends State<onlinePeople> {
   Widget _buildOnlineList(BuildContext context) {
     return Column(
       children: onlineUsers.map((user) {
-        bool isOnline = user['status'] == 'Available' || user['status'] == 'Active now';
+        bool isOnline =
+            user['status'] == 'Available' || user['status'] == 'Active now';
 
         return GestureDetector(
           onTap: () {
@@ -154,7 +162,8 @@ class _onlinePeopleState extends State<onlinePeople> {
           },
           child: Card(
             elevation: 3,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             margin: const EdgeInsets.only(bottom: 16),
             child: Padding(
               padding: const EdgeInsets.all(12),
@@ -176,7 +185,8 @@ class _onlinePeopleState extends State<onlinePeople> {
                             decoration: BoxDecoration(
                               color: Colors.green,
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2),
+                              border:
+                              Border.all(color: Colors.white, width: 2),
                             ),
                           ),
                         ),
@@ -187,7 +197,8 @@ class _onlinePeopleState extends State<onlinePeople> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(user['name']!,
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
                       Text(user['status']!,
                           style: TextStyle(color: Colors.grey.shade600)),

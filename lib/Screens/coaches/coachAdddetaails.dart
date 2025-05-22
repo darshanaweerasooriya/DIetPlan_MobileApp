@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:healthbiteapp/Screens/clients/results.dart';
+import 'package:healthbiteapp/Screens/coaches/details.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -12,6 +13,7 @@ class addDetailsCoach extends StatefulWidget {
 }
 
 class _addDetailsCoachState extends State<addDetailsCoach> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController ageController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
@@ -20,11 +22,21 @@ class _addDetailsCoachState extends State<addDetailsCoach> {
 
   String? _gender;
   final List<String> _selectedTargets = [];
-
   final List<String> _targets = ['Weight Loss', 'Body Building', 'Fitness'];
 
-  void _submitData() async {
-    final url = Uri.parse('http://localhost:3001/api/professionals/create'); // Replace with your backend URL
+  bool _isLoading = false;
+
+  Future<void> _submitData() async {
+    if (!_formKey.currentState!.validate() || _gender == null || _selectedTargets.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill in all required fields.")),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final url = Uri.parse('http://localhost:3001/api/professionals/create');
 
     final response = await http.post(
       url,
@@ -35,9 +47,7 @@ class _addDetailsCoachState extends State<addDetailsCoach> {
         "password": "password123",
         "email": "darshana@example.com",
         "phonenumb": "0711234567",
-        "type": 1,  // Example: 1 for coach
-
-        // Form data
+        "type": 1,
         "age": int.tryParse(ageController.text),
         "height": int.tryParse(heightController.text),
         "weight": int.tryParse(weightController.text),
@@ -48,15 +58,36 @@ class _addDetailsCoachState extends State<addDetailsCoach> {
       }),
     );
 
+    setState(() => _isLoading = false);
+
     if (response.statusCode == 201) {
-      print("Account created successfully");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Account created successfully")),
       );
+
+      final coachData = {
+        "name": "Darshana",
+        "username": "darshana123",
+        "email": "darshana@example.com",
+        "phonenumb": "0711234567",
+        "age": int.tryParse(ageController.text),
+        "height": int.tryParse(heightController.text),
+        "weight": int.tryParse(weightController.text),
+        "gender": _gender,
+        "services": _selectedTargets,
+        "qualifications": qualificationController.text,
+        "about": aboutController.text,
+      };
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CoachDetailsResultScreen(coachData: coachData),
+        ),
+      );
     } else {
-      print("Error: ${response.body}");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to create account")),
+        SnackBar(content: Text("Failed to create account: ${response.body}")),
       );
     }
   }
@@ -90,62 +121,76 @@ class _addDetailsCoachState extends State<addDetailsCoach> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Add Coach Details")),
+      appBar: AppBar(
+        title: const Text("Add Coach Details"),
+        backgroundColor: Colors.teal,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            TextField(
-              controller: ageController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: "Age"),
-            ),
-            TextField(
-              controller: heightController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: "Height (cm)"),
-            ),
-            TextField(
-              controller: weightController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: "Weight (kg)"),
-            ),
-            const SizedBox(height: 10),
-            const Text("Gender"),
-            ListTile(
-              title: const Text('Male'),
-              leading: Radio<String>(
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              _buildInputField("Age", ageController),
+              _buildInputField("Height (cm)", heightController),
+              _buildInputField("Weight (kg)", weightController),
+              const SizedBox(height: 12),
+              const Text("Gender", style: TextStyle(fontWeight: FontWeight.bold)),
+              RadioListTile<String>(
+                title: const Text('Male'),
                 value: 'Male',
                 groupValue: _gender,
                 onChanged: (value) => setState(() => _gender = value),
               ),
-            ),
-            ListTile(
-              title: const Text('Female'),
-              leading: Radio<String>(
+              RadioListTile<String>(
+                title: const Text('Female'),
                 value: 'Female',
                 groupValue: _gender,
                 onChanged: (value) => setState(() => _gender = value),
               ),
-            ),
-            const SizedBox(height: 10),
-            const Text("Target Services"),
-            ..._targets.map(_buildTargetCheckbox).toList(),
-            TextField(
-              controller: qualificationController,
-              decoration: const InputDecoration(labelText: "Qualifications"),
-            ),
-            TextField(
-              controller: aboutController,
-              decoration: const InputDecoration(labelText: "About"),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _submitData,
-              child: const Text("Submit"),
-            ),
-          ],
+              const SizedBox(height: 12),
+              const Text("Target Services", style: TextStyle(fontWeight: FontWeight.bold)),
+              ..._targets.map(_buildTargetCheckbox).toList(),
+              _buildInputField("Qualifications", qualificationController),
+              _buildInputField("About", aboutController, maxLines: 3),
+              const SizedBox(height: 20),
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ElevatedButton.icon(
+                icon: const Icon(Icons.save_alt),
+                label: const Text("Submit", style: TextStyle(color: Colors.white),),
+                onPressed: _submitData,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  backgroundColor: Colors.teal,
+                  textStyle: const TextStyle(fontSize: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputField(String label, TextEditingController controller, {int maxLines = 1}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: TextFormField(
+        controller: controller,
+        maxLines: maxLines,
+        keyboardType: TextInputType.numberWithOptions(decimal: true),
+        validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+        decoration: InputDecoration(
+          labelText: label,
+          filled: true,
+          fillColor: Colors.grey[100],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
     );

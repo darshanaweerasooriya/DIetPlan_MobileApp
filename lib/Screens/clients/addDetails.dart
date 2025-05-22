@@ -19,7 +19,7 @@ class _addDetailsState extends State<addDetails> {
   final TextEditingController targetDateController = TextEditingController();
 
   String _gender = 'Male';
-  String _target = 'Body Building';
+  String _target = 'Body building';
 
   Future<void> submitData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -55,9 +55,9 @@ class _addDetailsState extends State<addDetails> {
       final responseData = jsonDecode(response.body);
       final result = responseData['result'];
 
-      double dailyCalories = result['dailyCalories'];
-      double protein = result['protein'];
-      double water = result['water'];
+      double dailyCalories = double.parse(result['dailyCalories'].toString());
+      double protein = double.parse(result['protein'].toString());
+      double water = double.parse(result['water'].toString());
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Details submitted successfully!")),
@@ -79,30 +79,6 @@ class _addDetailsState extends State<addDetails> {
       print(response.body); // for debugging
     }
   }
-
-
-  double calculateDailyCalories() {
-    // Example BMR calculation (Mifflin-St Jeor Equation)
-    double weight = double.parse(weightController.text.trim());
-    double height = double.parse(heightController.text.trim());
-    int age = int.parse(ageController.text.trim());
-
-    // Assuming male gender for this example (adjust based on the actual gender)
-    return (10 * weight) + (6.25 * height) - (5 * age) + 5; // BMR for men
-  }
-
-  double calculateProtein() {
-    // Example: Protein intake is typically 1g per kg of body weight
-    double weight = double.parse(weightController.text.trim());
-    return weight; // Example: 1g protein per kg of body weight
-  }
-
-  double calculateWaterIntake() {
-    // Example: Water intake is typically 30-35 ml per kg of body weight
-    double weight = double.parse(weightController.text.trim());
-    return weight * 0.03; // Example: 30 ml per kg of body weight
-  }
-
 
   @override
   Widget build(BuildContext context) {

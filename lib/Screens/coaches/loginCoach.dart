@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:healthbiteapp/Screens/auth/coaches/userSignup.dart';
+import 'package:healthbiteapp/Screens/coaches/signupCoach.dart';
 import 'package:healthbiteapp/components/clients/appbar.dart';
 import 'package:healthbiteapp/components/coaches/coacchtab.dart';
 import 'package:http/http.dart' as http;
@@ -273,7 +274,7 @@ class _loginCoachState extends State<loginCoach> {
                                                 onTap: (){
                                                   Navigator.push(
                                                       context, MaterialPageRoute(
-                                                      builder: (context) => signUpCLient()
+                                                      builder: (context) => signupCoach()
                                                   ));
 
                                                 },
