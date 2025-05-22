@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:healthbiteapp/Screens/auth/coaches/userLogin.dart';
 import 'package:healthbiteapp/Screens/clients/feedback.dart';
 import 'package:healthbiteapp/Screens/clients/goccery.dart';
 import 'package:http/http.dart' as http;
@@ -16,19 +17,18 @@ class _dashBoardState extends State<dashBoard> {
   double? height;
   double? weight;
   bool isLoading = true;
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     loadAssessment();
   }
 
-  Future<void>  loadAssessment() async{
+  Future<void> loadAssessment() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
 
     if (token.isEmpty) {
-      // No token found, handle accordingly
       setState(() {
         isLoading = false;
       });
@@ -39,8 +39,12 @@ class _dashBoardState extends State<dashBoard> {
     final latest = await fetchLatestAssessment(token);
     if (latest != null) {
       setState(() {
-        height = (latest['height'] != null) ? double.tryParse(latest['height'].toString()) : null;
-        weight = (latest['weight'] != null) ? double.tryParse(latest['weight'].toString()) : null;
+        height = (latest['height'] != null)
+            ? double.tryParse(latest['height'].toString())
+            : null;
+        weight = (latest['weight'] != null)
+            ? double.tryParse(latest['weight'].toString())
+            : null;
         isLoading = false;
       });
     } else {
@@ -50,34 +54,52 @@ class _dashBoardState extends State<dashBoard> {
     }
   }
 
-  Future<Map<String, dynamic>?> fetchLatestAssessment(String token) async{
+  Future<Map<String, dynamic>?> fetchLatestAssessment(String token) async {
     final response = await http.get(
       Uri.parse('http://10.0.2.2:3001/api/fitnessassess/latest'),
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
-      }
+      },
     );
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return data['latest']; // Make sure this matches your API response structure
+      return data['latest'];
     } else {
       print('Failed to fetch assessment: ${response.statusCode}');
       return null;
     }
   }
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => clientLogin()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F6FC),
+      appBar: AppBar(
+        title: const Text('Dashboard'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: logout,
+            tooltip: 'Logout',
+          )
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: ListView(
             children: [
               _buildHeader(),
-              // const SizedBox(height: 20),
-              // _buildMetrics(),
               const SizedBox(height: 20),
               _buildScrollableStats(),
               const SizedBox(height: 20),
@@ -106,16 +128,21 @@ class _dashBoardState extends State<dashBoard> {
               const CircleAvatar(
                 radius: 30,
                 backgroundColor: Colors.blueAccent,
-                child: Text("A", style: TextStyle(color: Colors.white, fontSize: 24)),
+                child: Text("A",
+                    style: TextStyle(color: Colors.white, fontSize: 24)),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Name", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                    const Text("Name",
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    Text("Age 23", style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+                    Text("Age 23",
+                        style:
+                        TextStyle(fontSize: 16, color: Colors.grey[600])),
                   ],
                 ),
               ),
@@ -125,16 +152,10 @@ class _dashBoardState extends State<dashBoard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _infoColumn(
-                  "Height",
-                  height != null
-                      ? "${height!.toStringAsFixed(0)} cm"
-                      : "N/A"),
-              _infoColumn(
-                  "Weight",
-                  weight != null
-                      ? "${weight!.toStringAsFixed(0)} kg"
-                      : "N/A"),
+              _infoColumn("Height",
+                  height != null ? "${height!.toStringAsFixed(0)} cm" : "N/A"),
+              _infoColumn("Weight",
+                  weight != null ? "${weight!.toStringAsFixed(0)} kg" : "N/A"),
             ],
           ),
         ],
@@ -147,40 +168,9 @@ class _dashBoardState extends State<dashBoard> {
       children: [
         Text(label, style: TextStyle(fontSize: 16, color: Colors.grey[600])),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        Text(value,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
       ],
-    );
-  }
-
-  // Widget _buildMetrics() {
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //     children: [
-  //       _metricCard("Height", "186 cm", Colors.greenAccent),
-  //       _metricCard("Weight", "86 kg", Colors.orangeAccent),
-  //     ],
-  //   );
-  // }
-
-  Widget _metricCard(String title, String value, Color color) {
-    return Expanded(
-      child: Container(
-        height: 100,
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(title, style: const TextStyle(fontSize: 16, color: Colors.black54)),
-            const SizedBox(height: 8),
-            Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-          ],
-        ),
-      ),
     );
   }
 
@@ -190,15 +180,18 @@ class _dashBoardState extends State<dashBoard> {
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
-          _statCard("Calories", "2200 kcal", Icons.local_fire_department, Colors.redAccent),
-          _statCard("Protein", "120 g", Icons.fitness_center, Colors.deepPurple),
+          _statCard("Calories", "2200 kcal", Icons.local_fire_department,
+              Colors.redAccent),
+          _statCard(
+              "Protein", "120 g", Icons.fitness_center, Colors.deepPurple),
           _statCard("Water", "2.5 L", Icons.water_drop, Colors.blue),
         ],
       ),
     );
   }
 
-  Widget _statCard(String title, String value, IconData icon, Color color) {
+  Widget _statCard(
+      String title, String value, IconData icon, Color color) {
     return Container(
       width: 160,
       margin: const EdgeInsets.only(right: 16),
@@ -213,8 +206,11 @@ class _dashBoardState extends State<dashBoard> {
         children: [
           Icon(icon, size: 32, color: color),
           const Spacer(),
-          Text(title, style: const TextStyle(fontSize: 16, color: Colors.black87)),
-          Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(title,
+              style: const TextStyle(fontSize: 16, color: Colors.black87)),
+          Text(value,
+              style:
+              const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -228,7 +224,8 @@ class _dashBoardState extends State<dashBoard> {
           title: "Educational",
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => MealDetailPage(mealType: "Breakfast")),
+            MaterialPageRoute(
+                builder: (_) => MealDetailPage(mealType: "Breakfast")),
           ),
         ),
         const SizedBox(height: 10),
@@ -237,7 +234,8 @@ class _dashBoardState extends State<dashBoard> {
           title: "Appointment",
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => MealDetailPage(mealType: "Lunch")),
+            MaterialPageRoute(
+                builder: (_) => MealDetailPage(mealType: "Lunch")),
           ),
         ),
         const SizedBox(height: 10),
@@ -248,8 +246,8 @@ class _dashBoardState extends State<dashBoard> {
             context,
             MaterialPageRoute(
               builder: (_) => GroceryListPage(
-                token: 'your_token_here', // Replace with your stored token
-                selectedDate: '2025-05-19', // Or use dynamically selected date
+                token: 'your_token_here',
+                selectedDate: '2025-05-19',
               ),
             ),
           ),
@@ -286,7 +284,9 @@ class _dashBoardState extends State<dashBoard> {
             Icon(icon, color: Colors.green, size: 30),
             const SizedBox(width: 20),
             Expanded(
-              child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              child: Text(title,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
             ),
             const Icon(Icons.arrow_forward_ios, color: Colors.grey),
           ],

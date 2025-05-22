@@ -27,13 +27,13 @@ class _accountState extends State<account> {
     final token = prefs.getString('token') ?? '';
 
     if (token.isEmpty) {
-      // Handle missing token
+      print('Token not found');
       return;
     }
 
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:3001/api/users/profile/:id'),
+        Uri.parse('http://10.0.2.2:3001/api/users/profile'),
         headers: {
           'Authorization': 'Bearer $token',
         },
@@ -60,6 +60,7 @@ class _accountState extends State<account> {
     await prefs.remove('token');
     Navigator.pushReplacementNamed(context, '/login');
   }
+
 
   @override
   Widget build(BuildContext context) {
