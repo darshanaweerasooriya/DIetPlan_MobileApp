@@ -1,16 +1,25 @@
-# healthbiteapp
+🥗 DietPlan – Personalized Fitness & Nutrition App
 
-A new Flutter project.
+Overview
+DietPlan is a Flutter-based mobile app that generates personalized diet and fitness plans based on user input like age, weight, and health goals. It provides chat-based coaching features and supports interactive engagement with certified professionals.
 
-## Getting Started
+💡 Features
+Personalized goal tracking (age, weight, objectives)
 
-This project is a starting point for a Flutter application.
+Chat-based interaction with certified coaches
 
-A few resources to get you started if this is your first Flutter project:
+Dynamic diet and fitness plan generation
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Real-time coach-user interaction
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Secure user registration and login
+
+🧰 Tech Stack
+Frontend: Flutter
+
+Backend: Node.js, Express.js
+
+Database: MongoDB
+
+Tools: Git, GitHub
+
